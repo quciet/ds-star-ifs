@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dsstar"
+version = "0.1.0"
+description = "Minimal DS-STAR-style iterative data-science agent"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+authors = [{name = "Codex"}]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+xlsx = ["openpyxl"]
+dotenv = ["python-dotenv"]
+rich = ["rich"]
+
+[project.scripts]
+dsstar = "dsstar.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
