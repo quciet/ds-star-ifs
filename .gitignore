@@ -4,4 +4,4 @@ venv/
 env/
 
 # Local test/run artifacts
-run/
+runs/
