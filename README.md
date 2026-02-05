@@ -4,6 +4,27 @@ Minimal-but-real DS-STAR-style iterative data-science agent with a pluggable LLM
 
 ## Installation
 
+### 1) Clone the repository
+
+```bash
+git clone https://github.com/<your-org>/ds-star-ifs.git
+cd ds-star-ifs
+```
+
+### 2) Create and activate a local virtual environment (VM)
+
+Use an isolated local environment so package installs and generated run artifacts do not affect your global Python setup.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+```
+
+If you prefer a different virtual environment folder name (for example `vm/`), that is also supported.
+
+### 3) Install the package
+
 ```bash
 pip install -e .
 ```
@@ -57,3 +78,5 @@ Each run writes to `./runs/<timestamp>/`:
 - `round_XX_code.py`: generated script per round
 - `round_XX_exec.json`: execution stdout/stderr/exit_code/duration
 - `final_answer.md`: final answer text
+
+The default `.gitignore` is configured so local VM folders (for example `.venv/`, `venv/`, `vm/`) and run artifacts (`runs/`) are not tracked by Git.
