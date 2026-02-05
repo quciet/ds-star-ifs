@@ -27,6 +27,16 @@ def run(
 ) -> Dict[str, Any]:
     """Return a strict JSON dict describing sufficiency."""
     log("Verifier: evaluating result")
+
+    if isinstance(last_exec, dict) and int(last_exec.get("exit_code", 0)) != 0:
+        log("Verifier: forcing insufficient due to failed execution")
+        return {
+            "sufficient": False,
+            "reason": "Last code execution failed (non-zero exit code).",
+            "missing": ["Successful execution (exit_code=0)"],
+            "next_action": "fix_step",
+        }
+
     prompt = verifier_prompt(question, descriptions, plan, last_code, last_exec)
     response = client.complete(prompt)
     try:

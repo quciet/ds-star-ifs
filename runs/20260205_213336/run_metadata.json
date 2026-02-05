@@ -1,0 +1,7 @@
+{
+  "provider": "mock",
+  "model": "mock-001",
+  "max_rounds": 3,
+  "question": "Create a python script that writes hello.txt with the text 'hello'.",
+  "files": []
+}

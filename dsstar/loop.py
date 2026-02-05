@@ -144,11 +144,18 @@ def run_loop(
             log(f"Round {round_idx:02d} verifier sufficient")
             break
 
+        if verifier_state.get("next_action") == "fix_step":
+            log(f"Round {round_idx:02d} verifier requested fix_step")
+
         router_state = run_router(verifier_state, plan, client)
         action = router_state.get("action", "add_step")
         if action == "stop":
-            log("Router requested stop")
-            break
+            if verifier_state.get("next_action") == "fix_step":
+                log("Router stop ignored because verifier requested fix_step")
+                action = "add_step"
+            else:
+                log("Router requested stop")
+                break
         if action == "backtrack":
             _mark_backtrack(plan, router_state.get("backtrack_to_step_id"))
             _write_plan(run_path, plan)

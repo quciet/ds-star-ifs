@@ -8,9 +8,10 @@ from typing import Dict, Any
 
 def run_python_script(script_path: Path, cwd: Path, timeout_sec: int) -> Dict[str, Any]:
     start = time.time()
+    script_abspath = script_path.resolve()
     try:
         proc = subprocess.run(
-            ["python", str(script_path)],
+            ["python", str(script_abspath)],
             cwd=str(cwd),
             capture_output=True,
             text=True,

@@ -1,0 +1,8 @@
+[
+  {
+    "id": 1,
+    "title": "Write hello.txt",
+    "details": "Create hello.txt in the run directory containing 'hello'.",
+    "status": "done"
+  }
+]

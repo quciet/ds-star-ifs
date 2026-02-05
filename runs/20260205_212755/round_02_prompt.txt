@@ -1,0 +1,50 @@
+ROLE: CODER
+Write a full Python script that accomplishes all steps up to the next todo step.
+Output ONLY Python code, no markdown fences.
+Question: Create a python script that writes hello.txt with the text 'hello'.
+Next step:
+{
+  "id": 1,
+  "title": "Write hello.txt",
+  "details": "Create hello.txt in the run directory containing 'hello'.",
+  "status": "todo"
+}
+Plan:
+[
+  {
+    "id": 1,
+    "title": "Write hello.txt",
+    "details": "Create hello.txt in the run directory containing 'hello'.",
+    "status": "todo"
+  },
+  {
+    "id": 2,
+    "title": "Write hello.txt",
+    "details": "Create hello.txt in the run directory containing 'hello'.",
+    "status": "todo"
+  },
+  {
+    "id": 3,
+    "title": "Write hello.txt",
+    "details": "Create hello.txt in the run directory containing 'hello'.",
+    "status": "todo"
+  }
+]
+Descriptions:
+{
+  "files": {},
+  "warnings": []
+}
+Previous code:
+from pathlib import Path
+Path('hello.txt').write_text('hello', encoding='utf-8')
+print('wrote hello.txt')
+
+Last execution:
+{
+  "stdout": "",
+  "stderr": "python: can't open file 'D:\\\\DS-STAR\\\\ds-star-ifs\\\\runs\\\\20260205_212755\\\\runs\\\\20260205_212755\\\\round_01_code.py': [Errno 2] No such file or directory\n",
+  "exit_code": 2,
+  "duration_sec": 0.053,
+  "timeout": false
+}

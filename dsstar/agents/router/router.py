@@ -14,6 +14,13 @@ def run(
     client: LLMClient,
 ) -> Dict[str, Any]:
     """Return a strict JSON dict describing routing."""
+    if (
+        not bool(verifier_output.get("sufficient", False))
+        and str(verifier_output.get("next_action", "")) == "fix_step"
+    ):
+        log("Router: forcing add_step due to verifier fix_step request")
+        return {"action": "add_step", "backtrack_to_step_id": None}
+
     log("Router: deciding next action")
     prompt = router_prompt(plan, verifier_output)
     response = client.complete(prompt)
