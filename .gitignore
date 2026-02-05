@@ -1,7 +1,12 @@
-# Local Python virtual environments
+# Python cache / bytecode
+__pycache__/
+*.py[cod]
+
+# Local Python virtual environments (VMs)
 .venv/
 venv/
 env/
+vm/
 
 # Local test/run artifacts
 runs/
