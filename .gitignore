@@ -1,0 +1,7 @@
+# Local Python virtual environments
+.venv/
+venv/
+env/
+
+# Local test/run artifacts
+run/
