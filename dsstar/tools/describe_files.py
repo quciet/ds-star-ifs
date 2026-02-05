@@ -4,7 +4,7 @@ import csv
 import importlib.util
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def _infer_type(value: str) -> str:
@@ -40,7 +40,12 @@ def _describe_csv(path: Path) -> Dict[str, Any]:
             sample_values = [row[col_idx] for row in sample_rows if col_idx < len(row)]
             inferred = {_infer_type(value) for value in sample_values if value is not None}
             type_hints.append({"column": name, "types": sorted(inferred)})
-    return {"type": "csv", "header": header, "sample_rows": sample_rows, "type_hints": type_hints}
+    return {
+        "type": "csv",
+        "header": header,
+        "sample_rows": sample_rows,
+        "type_hints": type_hints,
+    }
 
 
 def _describe_text(path: Path) -> Dict[str, Any]:
@@ -54,10 +59,27 @@ def _describe_json(path: Path) -> Dict[str, Any]:
     snippet = content[:2000]
     try:
         parsed = json.loads(content)
-        summary = type(parsed).__name__
+        if isinstance(parsed, dict):
+            summary = {
+                "kind": "object",
+                "keys": list(parsed.keys())[:20],
+            }
+        elif isinstance(parsed, list):
+            summary = {
+                "kind": "list",
+                "length": len(parsed),
+                "sample": parsed[:5],
+            }
+        else:
+            summary = {"kind": type(parsed).__name__}
     except json.JSONDecodeError:
-        summary = "invalid_json"
-    return {"type": "json", "summary": summary, "length": len(content), "snippet": snippet}
+        summary = {"kind": "invalid_json"}
+    return {
+        "type": "json",
+        "summary": summary,
+        "length": len(content),
+        "snippet": snippet,
+    }
 
 
 def _describe_xlsx(path: Path) -> Dict[str, Any]:
@@ -67,6 +89,7 @@ def _describe_xlsx(path: Path) -> Dict[str, Any]:
             "warning": "openpyxl not installed; cannot read sheets.",
         }
     from openpyxl import load_workbook
+
     wb = load_workbook(path, read_only=True)
     sheets_info = {}
     for sheet in wb.sheetnames:
@@ -74,13 +97,13 @@ def _describe_xlsx(path: Path) -> Dict[str, Any]:
         rows = []
         for idx, row in enumerate(ws.iter_rows(values_only=True)):
             rows.append([str(cell) if cell is not None else "" for cell in row])
-            if idx >= 5:
+            if idx >= 4:
                 break
         sheets_info[sheet] = {"sample_rows": rows}
     return {"type": "xlsx", "sheets": sheets_info}
 
 
-def describe_files(paths: List[str], output_path: Path) -> Dict[str, Any]:
+def describe_files(paths: List[str], output_path: Optional[Path] = None) -> Dict[str, Any]:
     descriptions: Dict[str, Any] = {"files": {}, "warnings": []}
     for raw in paths:
         path = Path(raw)
@@ -93,7 +116,7 @@ def describe_files(paths: List[str], output_path: Path) -> Dict[str, Any]:
                 info = _describe_csv(path)
             elif suffix == ".xlsx":
                 info = _describe_xlsx(path)
-            elif suffix in {".json"}:
+            elif suffix == ".json":
                 info = _describe_json(path)
             elif suffix in {".txt", ".md"}:
                 info = _describe_text(path)
@@ -102,5 +125,6 @@ def describe_files(paths: List[str], output_path: Path) -> Dict[str, Any]:
             descriptions["files"][raw] = info
         except Exception as exc:  # pylint: disable=broad-except
             descriptions["warnings"].append(f"Failed to describe {raw}: {exc}")
-    output_path.write_text(json.dumps(descriptions, indent=2), encoding="utf-8")
+    if output_path:
+        output_path.write_text(json.dumps(descriptions, indent=2), encoding="utf-8")
     return descriptions
