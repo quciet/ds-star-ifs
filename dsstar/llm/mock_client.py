@@ -44,6 +44,6 @@ class MockClient(LLMClient):
             )
         if "ROLE: ROUTER" in prompt:
             return json.dumps({"action": "add_step", "backtrack_to_step_id": None})
-        if "ROLE: FINALIZER" in prompt:
+        if "ROLE: FINALYZER" in prompt:
             return "Created hello.txt in the run directory."
         return "Unsupported prompt."

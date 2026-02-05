@@ -3,6 +3,12 @@ import sys
 from pathlib import Path
 
 
+def _latest_run(run_root: Path) -> Path:
+    runs = [path for path in run_root.iterdir() if path.is_dir()]
+    assert runs, "Run folder missing."
+    return max(runs, key=lambda path: path.name)
+
+
 def test_smoke(tmp_path: Path) -> None:
     cmd = [
         sys.executable,
@@ -19,9 +25,7 @@ def test_smoke(tmp_path: Path) -> None:
     subprocess.run(cmd, check=True)
 
     run_root = tmp_path / "runs"
-    runs = list(run_root.iterdir())
-    assert runs, "Run folder missing."
-    run_path = runs[0]
+    run_path = _latest_run(run_root)
 
     assert (run_path / "round_00_code.py").exists()
     assert (run_path / "hello.txt").exists()
