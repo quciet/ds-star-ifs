@@ -1,7 +1,0 @@
-{
-  "stdout": "",
-  "stderr": "python: can't open file 'D:\\\\DS-STAR\\\\ds-star-ifs\\\\runs\\\\20260205_212755\\\\runs\\\\20260205_212755\\\\round_02_code.py': [Errno 2] No such file or directory\n",
-  "exit_code": 2,
-  "duration_sec": 0.047,
-  "timeout": false
-}

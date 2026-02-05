@@ -1,7 +1,0 @@
-{
-  "stdout": "wrote hello.txt\n",
-  "stderr": "",
-  "exit_code": 0,
-  "duration_sec": 0.078,
-  "timeout": false
-}
