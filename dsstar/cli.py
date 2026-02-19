@@ -18,7 +18,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--question", required=True, help="Question or task")
     run_parser.add_argument("--files", nargs="*", default=[], help="Input files")
     run_parser.add_argument("--max-rounds", type=int, default=12)
-    run_parser.add_argument("--provider", default="mock", choices=["mock", "openai", "gemini", "local"])
+    run_parser.add_argument("--provider", default="mock", choices=["mock", "openai", "gemini", "deepseek", "local"])
     run_parser.add_argument("--model", default=None)
     run_parser.add_argument("--timeout-sec", type=int, default=30)
     run_parser.add_argument("--run-dir", default="./runs")

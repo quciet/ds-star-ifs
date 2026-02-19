@@ -17,6 +17,7 @@ python -m dsstar run --question "Create a python script that writes hello.txt" -
   - None for `mock`.
   - For `openai`: `OPENAI_API_KEY` (optional `OPENAI_MODEL`).
   - For `gemini`: `GEMINI_API_KEY` (optional `GEMINI_MODEL`).
+  - For `deepseek`: `DEEPSEEK_API_KEY` (optional `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`).
   - For `local`: no required env var, but provider currently raises a runtime error.
 - **Expected outputs**:
   - New run folder under `--run-dir` containing `run_metadata.json`, `descriptions.json`, `plan.json`, `round_XX_*`, `final_answer.md`.
@@ -30,6 +31,10 @@ python -m dsstar run --question "Create a python script that writes hello.txt" -
 
 ```bash
 dsstar run --question "Summarize the dataset" --files data.csv --provider openai
+
+# DeepSeek smoke test
+export DEEPSEEK_API_KEY=...
+dsstar run --provider deepseek --question "Reply with OK"
 ```
 
 - **Required env vars**: same as module entry above.

@@ -4,6 +4,7 @@ from typing import Optional
 
 from dsstar.config import get_env
 from dsstar.llm.base import LLMClient
+from dsstar.llm.deepseek_client import DeepSeekClient
 from dsstar.llm.gemini_client import GeminiClient
 from dsstar.llm.local_stub import LocalStubClient
 from dsstar.llm.mock_client import MockClient
@@ -24,6 +25,16 @@ def get_client(provider: str, model: Optional[str] = None) -> LLMClient:
             _warn("OPENAI_API_KEY missing; falling back to mock provider.")
             return MockClient()
         return OpenAIClient(api_key=api_key, model=model or get_env("OPENAI_MODEL"))
+    if provider == "deepseek":
+        api_key = get_env("DEEPSEEK_API_KEY")
+        if not api_key:
+            _warn("DEEPSEEK_API_KEY missing; falling back to mock provider.")
+            return MockClient()
+        return DeepSeekClient(
+            api_key=api_key,
+            model=model or get_env("DEEPSEEK_MODEL"),
+            base_url=get_env("DEEPSEEK_BASE_URL"),
+        )
     if provider == "gemini":
         api_key = get_env("GEMINI_API_KEY")
         if not api_key:
