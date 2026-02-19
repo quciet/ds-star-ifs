@@ -10,10 +10,9 @@ from dsstar.llm.base import LLMClient
 
 class DeepSeekClient(LLMClient):
     def __init__(self, api_key: str, model: Optional[str] = None, base_url: Optional[str] = None) -> None:
+        super().__init__(name="deepseek", model=(model or "deepseek-reasoner"))
         self.api_key = api_key
-        self.model = model or "deepseek-reasoner"
         self.base_url = base_url or "https://api.deepseek.com"
-        self.name = "deepseek"
 
     def _chat_completions_url(self) -> str:
         return self.base_url.rstrip("/") + "/chat/completions"
