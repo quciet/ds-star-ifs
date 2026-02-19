@@ -17,7 +17,8 @@ Use an isolated local environment so package installs and generated run artifact
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+On Mac: source .venv/bin/activate
+On Windows: .venv\Scripts\activate
 python -m pip install --upgrade pip
 ```
 
