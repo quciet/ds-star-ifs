@@ -10,3 +10,8 @@ vm/
 
 # Local test/run artifacts
 runs/
+
+# local environment variables
+.env
+.env.*
+!.env.example
