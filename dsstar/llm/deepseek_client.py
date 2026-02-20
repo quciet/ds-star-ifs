@@ -20,7 +20,7 @@ class DeepSeekClient(LLMClient):
         super().__init__(name="deepseek", model=(model or "deepseek-reasoner"))
         self.api_key = api_key
         self.base_url = base_url or "https://api.deepseek.com"
-        self.name = "deepseek"
+        self.timeout_sec = timeout_sec
 
     def _chat_completions_url(self) -> str:
         return self.base_url.rstrip("/") + "/chat/completions"
