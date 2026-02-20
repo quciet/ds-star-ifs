@@ -33,7 +33,7 @@ def main(argv: List[str] | None = None) -> None:
         parser.print_help()
         return
 
-    client = get_client(args.provider, args.model)
+    client = get_client(args.provider, args.model, args.timeout_sec)
     run_path = run_loop(
         question=args.question,
         files=args.files,
