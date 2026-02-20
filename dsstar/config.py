@@ -11,6 +11,7 @@ def load_dotenv_if_available() -> None:
         return
     from dotenv import load_dotenv
 
+    load_dotenv(".env.local")
     load_dotenv()
 
 
