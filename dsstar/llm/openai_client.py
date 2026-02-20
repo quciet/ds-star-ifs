@@ -8,10 +8,11 @@ from dsstar.llm.base import LLMClient
 
 
 class OpenAIClient(LLMClient):
-    def __init__(self, api_key: str, model: Optional[str] = None) -> None:
+    def __init__(self, api_key: str, model: Optional[str] = None, timeout_sec: int = 60) -> None:
+        # Initialize dataclass fields via the base class for a consistent LLMClient contract.
+        super().__init__(name="openai", model=(model or "gpt-4o-mini"))
         self.api_key = api_key
-        self.model = model or "gpt-4o-mini"
-        self.name = "openai"
+        self.timeout_sec = timeout_sec
 
     def complete(self, prompt: str) -> str:
         url = "https://api.openai.com/v1/chat/completions"
@@ -30,6 +31,6 @@ class OpenAIClient(LLMClient):
             },
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=self.timeout_sec) as response:
             body = json.loads(response.read().decode("utf-8"))
         return body["choices"][0]["message"]["content"]

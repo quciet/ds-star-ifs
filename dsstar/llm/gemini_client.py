@@ -9,10 +9,11 @@ from dsstar.llm.base import LLMClient
 
 
 class GeminiClient(LLMClient):
-    def __init__(self, api_key: str, model: Optional[str] = None) -> None:
+    def __init__(self, api_key: str, model: Optional[str] = None, timeout_sec: int = 60) -> None:
+        # Initialize dataclass fields via the base class for a consistent LLMClient contract.
+        super().__init__(name="gemini", model=(model or "gemini-1.5-flash"))
         self.api_key = api_key
-        self.model = model or "gemini-1.5-flash"
-        self.name = "gemini"
+        self.timeout_sec = timeout_sec
 
     def complete(self, prompt: str) -> str:
         base = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
@@ -28,6 +29,6 @@ class GeminiClient(LLMClient):
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=self.timeout_sec) as response:
             body = json.loads(response.read().decode("utf-8"))
         return body["candidates"][0]["content"]["parts"][0]["text"]

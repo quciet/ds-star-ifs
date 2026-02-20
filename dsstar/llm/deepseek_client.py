@@ -9,10 +9,18 @@ from dsstar.llm.base import LLMClient
 
 
 class DeepSeekClient(LLMClient):
-    def __init__(self, api_key: str, model: Optional[str] = None, base_url: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        model: Optional[str] = None,
+        base_url: Optional[str] = None,
+        timeout_sec: int = 60,
+    ) -> None:
+        # Initialize dataclass fields via the base class for a consistent LLMClient contract.
         super().__init__(name="deepseek", model=(model or "deepseek-reasoner"))
         self.api_key = api_key
         self.base_url = base_url or "https://api.deepseek.com"
+        self.name = "deepseek"
 
     def _chat_completions_url(self) -> str:
         return self.base_url.rstrip("/") + "/chat/completions"
@@ -35,7 +43,7 @@ class DeepSeekClient(LLMClient):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urllib.request.urlopen(request, timeout=self.timeout_sec) as response:
                 body = json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as error:
             details = error.read().decode("utf-8", errors="replace")
