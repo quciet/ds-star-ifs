@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import py_compile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from dsstar.llm.base import LLMClient
 from dsstar.prompts import coder_prompt
 from dsstar.tools.log_utils import log, write_text
+from dsstar.tools.text_utils import extract_python_code
 
 
 def run(
@@ -31,7 +33,14 @@ def run(
     )
     prompt_path = run_dir / f"round_{round_idx:02d}_prompt.txt"
     write_text(prompt_path, prompt)
-    code = client.complete(prompt)
+    raw_code = client.complete(prompt)
+    code = extract_python_code(raw_code)
     code_path = run_dir / f"round_{round_idx:02d}_code.py"
     write_text(code_path, code)
+
+    try:
+        py_compile.compile(str(code_path), doraise=True)
+    except py_compile.PyCompileError as exc:
+        log(f"Coder: syntax pre-check failed for round {round_idx:02d}: {exc}")
+
     return code_path

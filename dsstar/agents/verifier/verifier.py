@@ -34,7 +34,7 @@ def run(
             "sufficient": False,
             "reason": "Last code execution failed (non-zero exit code).",
             "missing": ["Successful execution (exit_code=0)"],
-            "next_action": "fix_step",
+            "next_action": "debug",
         }
 
     prompt = verifier_prompt(question, descriptions, plan, last_code, last_exec)

@@ -43,6 +43,10 @@ def main(argv: List[str] | None = None) -> None:
         run_root=Path(args.run_dir),
     )
     log(f"Run complete: {run_path}")
-    final_answer = (run_path / "final_answer.md").read_text(encoding="utf-8")
-    print("\n=== Final Answer ===\n")
-    print(final_answer)
+    final_answer_path = run_path / "final_answer.md"
+    if final_answer_path.exists():
+        final_answer = final_answer_path.read_text(encoding="utf-8")
+        print("\n=== Final Answer ===\n")
+        print(final_answer)
+    else:
+        log("Final report not generated (run did not fully converge/validate).")
