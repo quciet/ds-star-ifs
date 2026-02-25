@@ -78,6 +78,16 @@ Each run writes to `./runs/<timestamp>/`:
 - `round_XX_prompt.txt`: prompt per round (coder prompts)
 - `round_XX_code.py`: generated script per round
 - `round_XX_exec.json`: execution stdout/stderr/exit_code/duration
-- `final_answer.md`: final answer text
+- `.dsstar/desc_scripts/*.py`: generated per-file description scripts
+- `final_solution.py`: final converged solution code
+- `final_solution_exec.json`: validation execution result for final_solution.py
+- `final_answer.md`: final narrative summary (written only after final solution validation)
 
 The default `.gitignore` is configured so local VM folders (for example `.venv/`, `venv/`, `vm/`) and run artifacts (`runs/`) are not tracked by Git.
+
+
+## Smoke test
+
+```bash
+pytest tests/test_smoke.py tests/test_router.py tests/test_analyzer.py -q
+```

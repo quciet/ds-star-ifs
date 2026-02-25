@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import json
@@ -28,13 +29,15 @@ def test_smoke(tmp_path: Path) -> None:
         "--run-dir",
         str(tmp_path / "runs"),
     ]
-    subprocess.run(cmd, check=True)
+    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[1])}
+    subprocess.run(cmd, check=True, env=env)
 
     run_root = tmp_path / "runs"
     run_path = _latest_run(run_root)
 
     assert (run_path / "round_00_code.py").exists()
     assert (run_path / "hello.txt").exists()
+    assert (run_path / "final_solution.py").exists()
     assert (run_path / "final_answer.md").exists()
 
 
@@ -51,13 +54,15 @@ def test_smoke_with_relative_run_dir(tmp_path: Path) -> None:
         "--run-dir",
         "runs",
     ]
-    subprocess.run(cmd, check=True, cwd=str(tmp_path))
+    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[1])}
+    subprocess.run(cmd, check=True, cwd=str(tmp_path), env=env)
 
     run_root = tmp_path / "runs"
     run_path = _latest_run(run_root)
 
     assert (run_path / "round_00_code.py").exists()
     assert (run_path / "hello.txt").exists()
+    assert (run_path / "final_solution.py").exists()
     assert (run_path / "final_answer.md").exists()
 
 
@@ -94,7 +99,7 @@ def test_verifier_rejects_failed_execution_without_llm() -> None:
         "sufficient": False,
         "reason": "Last code execution failed (non-zero exit code).",
         "missing": ["Successful execution (exit_code=0)"],
-        "next_action": "fix_step",
+        "next_action": "debug",
     }
     assert client.calls == 0
 
@@ -114,7 +119,7 @@ class _FailingLoopClient(LLMClient):
                     "status": "todo",
                 }
             )
-        if "ROLE: CODER" in prompt or "ROLE: DEBUGGER" in prompt:
+        if "ROLE: CODER" in prompt or "ROLE: DEBUGGER_PATCH" in prompt:
             return "raise RuntimeError('forced failure')\n"
         if "ROLE: VERIFIER" in prompt:
             return json.dumps(
@@ -127,7 +132,11 @@ class _FailingLoopClient(LLMClient):
             )
         if "ROLE: ROUTER" in prompt:
             return json.dumps({"action": "stop", "backtrack_to_step_id": None})
-        if "ROLE: FINALYZER" in prompt:
+        if "ROLE: DEBUGGER_TRACE_SUMMARY" in prompt:
+            return json.dumps({"error_type":"RuntimeError","likely_root_cause":"forced failure","key_trace_lines":["RuntimeError"],"suggested_fix_focus":"fix"})
+        if "ROLE: FINALYZER_CODE" in prompt:
+            return "from pathlib import Path\n\ndef main():\n    Path('hello.txt').write_text('hello', encoding='utf-8')\n\nif __name__ == '__main__':\n    main()\n"
+        if "ROLE: FINALYZER_REPORT" in prompt:
             return "final"
         return "Unsupported prompt."
 
