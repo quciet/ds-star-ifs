@@ -53,6 +53,9 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--model", default=None)
     run_parser.add_argument("--timeout-sec", type=int, default=30)
     run_parser.add_argument("--run-dir", default="./runs")
+    run_parser.add_argument("--refresh-master", action="store_true", help="Regenerate analyzer master describer")
+    run_parser.add_argument("--no-cluster-mode", action="store_true", help="Disable analyzer signature clustering")
+    run_parser.add_argument("--max-failures-to-fix-per-run", type=int, default=5, help="Cap analyzer override LLM fixes")
     return parser
 
 
@@ -79,6 +82,9 @@ def main(argv: List[str] | None = None) -> None:
         max_rounds=args.max_rounds,
         timeout_sec=args.timeout_sec,
         run_root=Path(args.run_dir),
+        refresh_master=args.refresh_master,
+        cluster_mode=not args.no_cluster_mode,
+        max_failures_to_fix_per_run=args.max_failures_to_fix_per_run,
     )
     log(f"Run complete: {run_path}")
     final_answer_path = run_path / "final_answer.md"

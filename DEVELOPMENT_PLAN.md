@@ -1,32 +1,30 @@
 # Development Plan
 
-## Current status
+## Analyzer flow (updated)
+1. Analyzer reuses a persistent master describer at `dsstar/knowledge/describe_master.py`; it is generated once via LLM only when missing or when `--refresh-master` is set.
+2. For every run, analyzer snapshots the active master to `runs/<ts>/.dsstar/describe_master_used.py` for reproducibility.
+3. Files are grouped by deterministic format signature (extension + size bucket + lightweight format probes).
+4. Analyzer still creates a per-file executable wrapper script in `runs/<ts>/.dsstar/desc_scripts/`.
+5. Wrappers call `describe_file(path)` from run-local master, and optionally call a file override first when present.
+6. Wrapper stdout is the canonical `d_i`; wrapper failure means non-zero, empty stdout, or `FAILED TO DESCRIBE` marker.
+7. On failure only, analyzer may call LLM to generate `runs/<ts>/.dsstar/desc_overrides/<file>_override.py`.
+8. Successful overrides trigger a cheap LLM promotion judge (`promote` JSON decision).
+9. If promoted, analyzer requests an LLM master patch, writes updated master KB, and re-validates representative via master-only wrapper.
+10. `descriptions.json` remains unified and now records signature, master version hash, wrapper path, override path, exec info, status, and promotion decision.
 
-- Single-process CLI orchestrator is in place, and each run writes artifacts to `runs/<timestamp>/`.
-- DS-STAR-faithful loop is implemented across analyzer -> planner -> coder -> executor -> debugger -> verifier -> router -> finalyzer.
-- Analyzer generates and executes per-file description scripts and stores outputs in `descriptions.json` and `.dsstar/desc_scripts` under the run folder.
-- Debugger uses a 2-stage flow (trace summary and patched code generation) before re-execution.
-- Router supports `add_step`, `backtrack`, and `stop` decisions.
-- Final report generation only occurs after final solution code is re-executed and validated successfully.
+## Cost note (LLM-call triggers)
+- `master_gen`: at most once when no master exists (or forced refresh).
+- `override_gen`: only on wrapper failures, capped by `--max-failures-to-fix-per-run`.
+- `promote_judge`: only after successful override.
+- `master_patch`: only when judge says promotion is generalizable.
+- Clustering reduces calls by reusing the same master behavior across same-signature files before considering per-file overrides.
 
-## How to test quickly
-
-1. Drop one or more ad-hoc data files in `input/` (for example: CSV, TSV, XLSX, JSON, TXT, Parquet, SQLite).
-2. Run with mock provider:
-   ```bash
-   python -m dsstar run --question "Describe the inputs" --provider mock
-   ```
-3. Run with DeepSeek provider:
-   ```bash
-   python -m dsstar run --question "Describe the inputs" --provider deepseek --timeout-sec 120
-   ```
-4. Inspect outputs in the latest run folder:
-   - `runs/<timestamp>/descriptions.json`
-   - `runs/<timestamp>/.dsstar/desc_scripts/`
-
-## Next steps (placeholder)
-
-- Add IFs-specific schema and semantic profiling heuristics for analyzer descriptions.
-- Add IFs-oriented planner templates for common exploratory and validation task patterns.
-- Add domain-aware verifier checks for IFs assumptions and evidence completeness.
-- Add IFs benchmark tasks and regression fixtures for end-to-end quality tracking.
+## Smoke / acceptance commands
+```bash
+python -m dsstar run --question "Describe the input files" --provider deepseek --model deepseek-reasoner --timeout-sec 240
+```
+Expected checks:
+- One master generation at most (if absent) and minimal overrides.
+- Wrapper scripts exist for every file under run `.dsstar/desc_scripts/`.
+- `descriptions.json` includes `master_version_id` and `status` per file.
+- Same-schema CSV cluster reuses master without per-file script-generation LLM calls.
