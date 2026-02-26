@@ -98,13 +98,15 @@ def verifier_prompt(
 def router_prompt(plan: List[Dict[str, Any]], verifier: Dict[str, Any]) -> str:
     return (
         _header("ROUTER")
-        + "Return strict JSON: {\"action\": \"add_step\"|\"backtrack\", "
-        + "\"backtrack_to_step_id\": int|null}.\n"
-        + "Rules: use add_step when incremental work is needed; use backtrack only when a prior step is erroneous.\n"
+        + 'Return strict JSON: {"action": "add_step"|"backtrack"|"stop", '
+        + '"backtrack_to_step_id": int|null}.\n'
+        + "Rules: use backtrack only if a specific earlier step is wrong/inconsistent; choose the earliest erroneous step id to revise.\n"
+        + "Use add_step if the plan is missing a required step.\n"
+        + "Use stop only if the task cannot be completed with the given files/constraints.\n"
+        + "Output JSON only.\n"
         + f"Plan:\n{json.dumps(plan, indent=2)}\n"
         + f"Verifier:\n{json.dumps(verifier, indent=2)}\n"
     )
-
 
 def debugger_trace_summary_prompt(
     exit_code: int,
