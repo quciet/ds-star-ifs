@@ -179,3 +179,61 @@ def finalyzer_report_prompt(
         + f"Artifact manifest:\n{json.dumps(artifact_manifest, indent=2)}\n"
         + f"Final execution:\n{json.dumps(final_exec, indent=2)}\n"
     )
+
+
+def master_describer_prompt() -> str:
+    return (
+        _header("ANALYZER_MASTER_DESCRIBER")
+        + "Return ONLY Python code for a reusable master describer module.\n"
+        + "Must define describe_file(path: str) -> str and use progressive strategies across csv/tsv/xlsx/sqlite/json/parquet/zip/text/unknown.\n"
+        + "Never crash: on failure return exactly 'FAILED TO DESCRIBE: <error>'.\n"
+        + "Avoid heavy full-file loads where possible; emit deterministic plain-text summaries.\n"
+    )
+
+
+def override_prompt(
+    file_path: str,
+    master_source: str,
+    wrapper_source: str,
+    failure_stderr: str,
+    file_sample: str,
+    fallback_facts: Dict[str, Any],
+) -> str:
+    return (
+        _header("ANALYZER_OVERRIDE")
+        + "Return ONLY Python code.\n"
+        + "Provide describe_file(path: str) -> str.\n"
+        + "Do not re-implement the whole toolkit. Only implement what is needed to handle this file.\n"
+        + "Avoid hardcoding file names unless unavoidable.\n"
+        + f"Target file: {file_path}\n"
+        + f"Master source:\n{master_source}\n"
+        + f"Wrapper source:\n{wrapper_source}\n"
+        + f"Failure stderr/traceback:\n{failure_stderr}\n"
+        + f"File sample/metadata:\n{file_sample}\n"
+        + f"Fallback facts:\n{json.dumps(fallback_facts, indent=2)}\n"
+    )
+
+
+def promote_judge_prompt(signature: str, failure_stderr: str, override_source: str) -> str:
+    return (
+        _header("ANALYZER_PROMOTE_JUDGE")
+        + "Return JSON only with schema: "
+        + '{"promote": true|false, "reason": "...", "general_pattern": "...", "patch_strategy": "master"|"keep_override"}.\n'
+        + "Promote only if fix is generalizable to a detectable signature/pattern and not file-name specific.\n"
+        + f"Signature: {signature}\n"
+        + f"Failure context:\n{failure_stderr}\n"
+        + f"Successful override code:\n{override_source}\n"
+    )
+
+
+def master_patch_prompt(current_master: str, signature: str, failure_summary: str, override_code: str) -> str:
+    return (
+        _header("ANALYZER_MASTER_PATCH")
+        + "Return ONLY full Python code for the patched master describer module.\n"
+        + "Patch must add a generalizable fallback/handler keyed by detectable signature traits.\n"
+        + "Do NOT hardcode a single file path/name. Preserve prior behavior.\n"
+        + f"Current master code:\n{current_master}\n"
+        + f"Target signature: {signature}\n"
+        + f"Failure summary:\n{failure_summary}\n"
+        + f"Reference successful override:\n{override_code}\n"
+    )

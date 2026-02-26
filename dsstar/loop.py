@@ -55,6 +55,9 @@ def run_loop(
     max_rounds: int,
     timeout_sec: int,
     run_root: Path,
+    refresh_master: bool = False,
+    cluster_mode: bool = True,
+    max_failures_to_fix_per_run: int = 5,
 ) -> Path:
     run_path = create_run_dir(run_root)
     log(f"Run path: {run_path}")
@@ -73,7 +76,14 @@ def run_loop(
     if not files:
         log("No input files found")
 
-    descriptions = run_analyzer(files, run_path, client=client)
+    descriptions = run_analyzer(
+        files,
+        run_path,
+        client=client,
+        refresh_master=refresh_master,
+        cluster_mode=cluster_mode,
+        max_failures_to_fix_per_run=max_failures_to_fix_per_run,
+    )
     artifacts.append("descriptions.json")
 
     plan: List[Dict[str, Any]] = []
