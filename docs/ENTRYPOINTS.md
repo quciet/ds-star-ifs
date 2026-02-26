@@ -41,6 +41,22 @@ dsstar run --provider deepseek --question "Reply with OK"
 - **Working directory**: any; same run-dir semantics.
 - **Expected outputs**: same as module entry.
 
+## Using input directory
+
+If `--files` is provided, DS-STAR uses those exact paths.
+
+If `--files` is omitted, DS-STAR scans `--input-dir` (default: `input/`) for supported files and passes discovered paths into the analyzer. Supported extensions are: `.csv`, `.tsv`, `.xlsx`, `.xlsm`, `.json`, `.txt`, `.parquet`, `.db`, `.sqlite`, `.sqlite3`. Hidden files and `input/.gitkeep` are ignored.
+
+Examples:
+
+```bash
+python -m dsstar run --question "Describe the inputs" --provider mock
+python -m dsstar run --question "Describe the inputs" --provider deepseek --timeout-sec 120
+python -m dsstar run --question "Describe the inputs" --provider deepseek --model deepseek-reasoner --timeout-sec 120
+```
+
+You can override the discovery directory with `--input-dir <path>`.
+
 ## 3) Test entrypoint: `pytest`
 
 - **Test file**: `tests/test_smoke.py`
@@ -83,4 +99,5 @@ These are intended to be imported and orchestrated by `run_loop` rather than lau
 - `--timeout-sec` controls subprocess timeout when executing generated code.
 - `--max-rounds` controls loop iteration cap.
 - `--run-dir` controls where all artifacts are created.
+- `--files` takes precedence over discovery; otherwise files are auto-discovered from `--input-dir` (default `input/`).
 - Optional `.env` auto-loading occurs only if `python-dotenv` is installed.

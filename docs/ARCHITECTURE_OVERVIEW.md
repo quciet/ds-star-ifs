@@ -2,7 +2,7 @@
 
 This repository implements a **single-process Python orchestration loop** for a DS-STAR-style iterative coding agent. The system is not an Electron/React stack; instead, it is a CLI-driven Python package that coordinates role-oriented modules (analyzer, planner, coder, executor, debugger, verifier, router, finalyzer), a pluggable LLM client layer, and file-based run artifacts.
 
-At runtime, `dsstar.cli:main` parses the `run` command, loads environment variables (and optionally `.env`), then selects an LLM provider (`mock`, `openai`, `gemini`, `local`). `run_loop` creates a timestamped run folder and iteratively executes:
+At runtime, `dsstar.cli:main` parses the `run` command, loads environment variables (and optionally `.env`), then selects an LLM provider (`mock`, `openai`, `gemini`, `local`, `deepseek`). The analyzer reads the file list passed by the CLI; when `--files` is omitted, the CLI defaults to scanning `./input` (or `--input-dir`) and passes discovered files to `run_loop`. `run_loop` creates a timestamped run folder and iteratively executes:
 
 1. **Analyze** user-provided input files.
 2. **Plan** one todo step.

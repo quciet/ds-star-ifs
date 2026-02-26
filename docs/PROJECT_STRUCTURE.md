@@ -10,6 +10,8 @@
 ├── LICENSE
 ├── README.md
 ├── pyproject.toml
+├── input/
+│   └── .gitkeep
 ├── docs/
 │   ├── ARCHITECTURE_OVERVIEW.md
 │   ├── ENTRYPOINTS.md
@@ -51,6 +53,7 @@
 - **`dsstar/`**: Core application package for the DS-STAR iterative agent loop (CLI, orchestration loop, agent role modules, provider adapters, utility tools).
 - **`tests/`**: Smoke/integration-style tests that execute CLI and loop behavior, including verifier safeguards.
 - **`docs/`**: Architectural and operational documentation (added by this audit).
+- **`input/`**: Drop ad-hoc CSV/Excel/etc here for analyzer smoke tests; not required for runtime; kept in git via `.gitkeep`; users should not commit real datasets.
 
 ## Module inventory
 
@@ -113,7 +116,7 @@
 - **No database layer** (no sqlite/postgres configs or DB schema files found).
 - Runtime data is file-based under `runs/<timestamp>/`:
   - metadata (`run_metadata.json`), file descriptions (`descriptions.json`), plan (`plan.json`), round prompts/code/execution JSON, and final markdown answer.
-- Input datasets are user-provided file paths passed through `--files` and interpreted by `describe_files`.
+- Input datasets are user-provided file paths passed through `--files` or auto-discovered from `./input` (or `--input-dir`) and interpreted by `describe_files`.
 - Optional `.xlsx` inspection depends on `openpyxl` extra.
 
 ## Config locations and execution effects
