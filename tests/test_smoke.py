@@ -29,16 +29,28 @@ def test_smoke(tmp_path: Path) -> None:
         "--run-dir",
         str(tmp_path / "runs"),
     ]
-    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[1])}
-    subprocess.run(cmd, check=True, env=env)
+    env = {
+        **os.environ,
+        "PYTHONPATH": str(Path(__file__).resolve().parents[1]),
+        "DSSTAR_REPO_ROOT": str(tmp_path),
+    }
+    subprocess.run(cmd, check=True, cwd=str(tmp_path), env=env)
 
     run_root = tmp_path / "runs"
     run_path = _latest_run(run_root)
 
     assert (run_path / "round_00_code.py").exists()
-    assert (run_path / "hello.txt").exists()
+    assert (tmp_path / "hello.txt").exists()
     assert (run_path / "final_solution.py").exists()
     assert (run_path / "final_answer.md").exists()
+
+    metadata = json.loads((run_path / "run_metadata.json").read_text(encoding="utf-8"))
+    assert metadata["repo_root"] == str(tmp_path.resolve())
+    assert metadata["executor_cwd"] == str(tmp_path.resolve())
+
+    exec_result = json.loads((run_path / "round_00_exec.json").read_text(encoding="utf-8"))
+    assert exec_result["cwd"] == str(tmp_path.resolve())
+    assert exec_result["script_path"] == str((run_path / "round_00_code.py").resolve())
 
 
 def test_smoke_with_relative_run_dir(tmp_path: Path) -> None:
@@ -55,15 +67,20 @@ def test_smoke_with_relative_run_dir(tmp_path: Path) -> None:
         "runs",
     ]
     env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[1])}
+    env["DSSTAR_REPO_ROOT"] = str(tmp_path)
     subprocess.run(cmd, check=True, cwd=str(tmp_path), env=env)
 
     run_root = tmp_path / "runs"
     run_path = _latest_run(run_root)
 
     assert (run_path / "round_00_code.py").exists()
-    assert (run_path / "hello.txt").exists()
+    assert (tmp_path / "hello.txt").exists()
     assert (run_path / "final_solution.py").exists()
     assert (run_path / "final_answer.md").exists()
+
+    metadata = json.loads((run_path / "run_metadata.json").read_text(encoding="utf-8"))
+    assert metadata["repo_root"] == str(tmp_path.resolve())
+    assert metadata["executor_cwd"] == str(tmp_path.resolve())
 
 
 @dataclass
