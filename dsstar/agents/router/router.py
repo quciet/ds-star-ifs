@@ -39,7 +39,7 @@ def run(
         return {"action": "add_step", "backtrack_to_step_id": None}
 
     action = str(parsed.get("action", "add_step"))
-    if action not in {"add_step", "backtrack"}:
+    if action not in {"add_step", "backtrack", "stop"}:
         action = "add_step"
 
     backtrack_id = _parse_backtrack_id(parsed.get("backtrack_to_step_id"))

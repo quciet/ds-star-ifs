@@ -23,6 +23,13 @@ def _next_todo(plan: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     return None
 
 
+def _next_attempted(plan: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    for step in plan:
+        if step.get("status") == "attempted":
+            return step
+    return None
+
+
 def _append_plan_step(plan: List[Dict[str, Any]], step: Dict[str, Any]) -> None:
     plan.append(step)
 
@@ -30,7 +37,11 @@ def _append_plan_step(plan: List[Dict[str, Any]], step: Dict[str, Any]) -> None:
 def _truncate_to_before(plan: List[Dict[str, Any]], target_id: Optional[int]) -> None:
     if target_id is None:
         return
-    plan[:] = [step for step in plan if int(step.get("id", 0)) < int(target_id)]
+    # Keep plan text but reset work queue from the chosen backtrack point onward.
+    # This preserves step descriptions while allowing re-attempts of revised steps.
+    for step in plan:
+        if int(step.get("id", 0)) >= int(target_id):
+            step["status"] = "todo"
 
 
 def _write_plan(run_dir: Path, plan: List[Dict[str, Any]]) -> None:
@@ -71,11 +82,14 @@ def run_loop(
         "missing": [],
         "next_action": "add_step",
     }
+    terminated_reason: Optional[str] = None
 
     for round_idx in range(max_rounds):
         log(f"Round {round_idx:02d} starting")
 
         next_step = _next_todo(plan)
+        if not next_step:
+            next_step = _next_attempted(plan)
         if not next_step:
             new_step = run_planner(question, descriptions, plan, last_exec, client)
             _append_plan_step(plan, new_step)
@@ -136,8 +150,15 @@ def run_loop(
         )
 
         if exec_result["exit_code"] == 0 and next_step:
-            next_step["status"] = "done"
+            # DS-STAR-faithful semantics: execution success alone is an attempt, not completion.
+            # Mark done only when verifier confirms convergence to avoid unnecessary add-step/router churn.
+            next_step["status"] = "done" if verifier_state.get("sufficient") else "attempted"
             _write_plan(run_path, plan)
+
+        if verifier_state.get("next_action") == "stop":
+            terminated_reason = "verifier_stop"
+            log("Verifier requested stop")
+            break
 
         if verifier_state.get("sufficient"):
             log(f"Round {round_idx:02d} verifier sufficient")
@@ -151,6 +172,7 @@ def run_loop(
         action = router_state.get("action", "add_step")
 
         if action == "stop":
+            terminated_reason = "router_stop"
             log("Router requested stop")
             break
         if action == "backtrack":
@@ -163,6 +185,10 @@ def run_loop(
             new_step = run_planner(question, descriptions, plan, last_exec, client)
             _append_plan_step(plan, new_step)
             _write_plan(run_path, plan)
+
+    if terminated_reason:
+        write_json(run_path / "run_status.json", {"terminated_reason": terminated_reason})
+        artifacts.append("run_status.json")
 
     if verifier_state.get("sufficient") and last_exec and int(last_exec.get("exit_code", 1)) == 0:
         final_code_path = finalyzer_code(
