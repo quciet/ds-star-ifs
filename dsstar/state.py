@@ -73,6 +73,8 @@ class RunMetadata:
     max_rounds: int
     question: str
     files: List[str]
+    repo_root: str = ""
+    executor_cwd: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -81,4 +83,6 @@ class RunMetadata:
             "max_rounds": self.max_rounds,
             "question": self.question,
             "files": self.files,
+            "repo_root": self.repo_root,
+            "executor_cwd": self.executor_cwd,
         }

@@ -13,7 +13,7 @@ from dsstar.agents.router.router import run as run_router
 from dsstar.agents.verifier.verifier import run as run_verifier
 from dsstar.llm.base import LLMClient
 from dsstar.state import RunMetadata
-from dsstar.tools.log_utils import create_run_dir, log, write_json
+from dsstar.tools.log_utils import create_run_dir, get_repo_root, log, write_json
 
 
 def _next_todo(plan: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -61,6 +61,7 @@ def run_loop(
 ) -> Path:
     run_path = create_run_dir(run_root)
     log(f"Run path: {run_path}")
+    repo_root = get_repo_root()
 
     metadata = RunMetadata(
         provider=client.name,
@@ -68,6 +69,8 @@ def run_loop(
         max_rounds=max_rounds,
         question=question,
         files=files,
+        repo_root=str(repo_root),
+        executor_cwd=str(repo_root),
     )
     write_json(run_path / "run_metadata.json", metadata.to_dict())
 
