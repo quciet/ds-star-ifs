@@ -15,3 +15,7 @@ runs/
 .env
 .env.*
 !.env.example
+
+# ad-hoc local input files
+input/*
+!input/.gitkeep

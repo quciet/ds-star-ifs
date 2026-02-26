@@ -70,6 +70,9 @@ def run_loop(
 
     artifacts: List[str] = ["run_metadata.json"]
 
+    if not files:
+        log("No input files found")
+
     descriptions = run_analyzer(files, run_path, client=client)
     artifacts.append("descriptions.json")
 
