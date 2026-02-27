@@ -74,6 +74,7 @@ class RunMetadata:
     question: str
     files: List[str]
     repo_root: str = ""
+    run_dir: str = ""
     executor_cwd: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
@@ -84,5 +85,6 @@ class RunMetadata:
             "question": self.question,
             "files": self.files,
             "repo_root": self.repo_root,
+            "run_dir": self.run_dir,
             "executor_cwd": self.executor_cwd,
         }

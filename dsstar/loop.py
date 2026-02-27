@@ -70,7 +70,8 @@ def run_loop(
         question=question,
         files=files,
         repo_root=str(repo_root),
-        executor_cwd=str(repo_root),
+        run_dir=str(run_path.resolve()),
+        executor_cwd=str(run_path.resolve()),
     )
     write_json(run_path / "run_metadata.json", metadata.to_dict())
 
