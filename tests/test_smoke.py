@@ -40,16 +40,18 @@ def test_smoke(tmp_path: Path) -> None:
     run_path = _latest_run(run_root)
 
     assert (run_path / "round_00_code.py").exists()
-    assert (tmp_path / "hello.txt").exists()
+    assert (run_path / "hello.txt").exists()
+    assert not (tmp_path / "hello.txt").exists()
     assert (run_path / "final_solution.py").exists()
     assert (run_path / "final_answer.md").exists()
 
     metadata = json.loads((run_path / "run_metadata.json").read_text(encoding="utf-8"))
     assert metadata["repo_root"] == str(tmp_path.resolve())
-    assert metadata["executor_cwd"] == str(tmp_path.resolve())
+    assert metadata["run_dir"] == str(run_path.resolve())
+    assert metadata["executor_cwd"] == str(run_path.resolve())
 
     exec_result = json.loads((run_path / "round_00_exec.json").read_text(encoding="utf-8"))
-    assert exec_result["cwd"] == str(tmp_path.resolve())
+    assert exec_result["cwd"] == str(run_path.resolve())
     assert exec_result["script_path"] == str((run_path / "round_00_code.py").resolve())
 
 
@@ -74,13 +76,15 @@ def test_smoke_with_relative_run_dir(tmp_path: Path) -> None:
     run_path = _latest_run(run_root)
 
     assert (run_path / "round_00_code.py").exists()
-    assert (tmp_path / "hello.txt").exists()
+    assert (run_path / "hello.txt").exists()
+    assert not (tmp_path / "hello.txt").exists()
     assert (run_path / "final_solution.py").exists()
     assert (run_path / "final_answer.md").exists()
 
     metadata = json.loads((run_path / "run_metadata.json").read_text(encoding="utf-8"))
     assert metadata["repo_root"] == str(tmp_path.resolve())
-    assert metadata["executor_cwd"] == str(tmp_path.resolve())
+    assert metadata["run_dir"] == str(run_path.resolve())
+    assert metadata["executor_cwd"] == str(run_path.resolve())
 
 
 @dataclass

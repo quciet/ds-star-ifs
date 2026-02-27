@@ -1,22 +1,29 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Dict, Any
 
 
-def run_python_script(script_path: Path, cwd: Path, timeout_sec: int) -> Dict[str, Any]:
+def run_python_script(
+    script_path: Path,
+    cwd: Path,
+    timeout_sec: int,
+    env: Dict[str, str] | None = None,
+) -> Dict[str, Any]:
     start = time.time()
     script_abspath = script_path.resolve()
     try:
         proc = subprocess.run(
-            ["python", str(script_abspath)],
+            [sys.executable, str(script_abspath)],
             cwd=str(cwd),
             capture_output=True,
             text=True,
             timeout=timeout_sec,
             check=False,
+            env=env,
         )
         duration = time.time() - start
         return {

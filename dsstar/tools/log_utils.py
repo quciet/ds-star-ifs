@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import datetime
 import json
-import os
 from pathlib import Path
 from typing import Any
+
+from dsstar.runtime_paths import find_repo_root
 
 
 def log(message: str) -> None:
@@ -32,17 +33,4 @@ def write_text(path: Path, content: str) -> None:
 
 
 def get_repo_root() -> Path:
-    env_root = os.environ.get("DSSTAR_REPO_ROOT")
-    if env_root:
-        return Path(env_root).expanduser().resolve()
-
-    try:
-        import dsstar
-
-        return Path(dsstar.__file__).resolve().parents[1]
-    except Exception:
-        current = Path(__file__).resolve()
-        for parent in (current, *current.parents):
-            if (parent / "pyproject.toml").exists():
-                return parent
-    return Path.cwd().resolve()
+    return find_repo_root()
