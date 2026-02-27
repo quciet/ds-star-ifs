@@ -48,6 +48,16 @@ def _write_plan(run_dir: Path, plan: List[Dict[str, Any]]) -> None:
     write_json(run_dir / "plan.json", plan)
 
 
+def _collect_proposed_changes(propose_dir: Path) -> List[str]:
+    if not propose_dir.exists():
+        return []
+    return sorted(
+        str(path.relative_to(propose_dir)).replace("\\", "/")
+        for path in propose_dir.rglob("*")
+        if path.is_file()
+    )
+
+
 def run_loop(
     question: str,
     files: List[str],
@@ -63,6 +73,9 @@ def run_loop(
     log(f"Run path: {run_path}")
     repo_root = get_repo_root()
 
+    propose_dir = (run_path / "proposed_changes").resolve()
+    propose_dir.mkdir(parents=True, exist_ok=True)
+
     metadata = RunMetadata(
         provider=client.name,
         model=client.model,
@@ -72,6 +85,7 @@ def run_loop(
         repo_root=str(repo_root),
         run_dir=str(run_path.resolve()),
         executor_cwd=str(run_path.resolve()),
+        proposed_changes_dir=str(propose_dir),
     )
     write_json(run_path / "run_metadata.json", metadata.to_dict())
 
@@ -234,4 +248,13 @@ def run_loop(
             )
             artifacts.append("final_answer.md")
             log("Final answer written")
+
+
+    proposed_changes = _collect_proposed_changes(propose_dir)
+    metadata.proposed_changes = proposed_changes
+    write_json(run_path / "run_metadata.json", metadata.to_dict())
+
+    if proposed_changes:
+        log(f"Proposed repo changes generated under: {propose_dir}. Review and apply manually.")
+
     return run_path

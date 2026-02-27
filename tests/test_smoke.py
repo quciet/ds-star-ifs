@@ -49,6 +49,9 @@ def test_smoke(tmp_path: Path) -> None:
     assert metadata["repo_root"] == str(tmp_path.resolve())
     assert metadata["run_dir"] == str(run_path.resolve())
     assert metadata["executor_cwd"] == str(run_path.resolve())
+    assert metadata["proposed_changes_dir"] == str((run_path / "proposed_changes").resolve())
+    assert metadata["proposed_changes"] == []
+    assert (run_path / "proposed_changes").is_dir()
 
     exec_result = json.loads((run_path / "round_00_exec.json").read_text(encoding="utf-8"))
     assert exec_result["cwd"] == str(run_path.resolve())
@@ -85,6 +88,9 @@ def test_smoke_with_relative_run_dir(tmp_path: Path) -> None:
     assert metadata["repo_root"] == str(tmp_path.resolve())
     assert metadata["run_dir"] == str(run_path.resolve())
     assert metadata["executor_cwd"] == str(run_path.resolve())
+    assert metadata["proposed_changes_dir"] == str((run_path / "proposed_changes").resolve())
+    assert metadata["proposed_changes"] == []
+    assert (run_path / "proposed_changes").is_dir()
 
 
 @dataclass
