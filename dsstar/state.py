@@ -76,6 +76,8 @@ class RunMetadata:
     repo_root: str = ""
     run_dir: str = ""
     executor_cwd: str = ""
+    proposed_changes_dir: str = ""
+    proposed_changes: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -87,4 +89,6 @@ class RunMetadata:
             "repo_root": self.repo_root,
             "run_dir": self.run_dir,
             "executor_cwd": self.executor_cwd,
+            "proposed_changes_dir": self.proposed_changes_dir,
+            "proposed_changes": self.proposed_changes,
         }

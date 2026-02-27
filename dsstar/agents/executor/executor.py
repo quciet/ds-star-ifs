@@ -18,6 +18,9 @@ def run(code_path: Path, run_dir: Path, timeout_sec: int, round_idx: int) -> Dic
     env = os.environ.copy()
     env["DSSTAR_REPO_ROOT"] = str(repo_root)
     env["DSSTAR_RUN_DIR"] = str(run_dir)
+    propose_dir = run_dir / "proposed_changes"
+    propose_dir.mkdir(parents=True, exist_ok=True)
+    env["DSSTAR_PROPOSE_DIR"] = str(propose_dir)
 
     before_entries = {
         p.name
