@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
 authors = [{name = "Codex"}]
-dependencies = []
+dependencies = ["pandas>=1.5", "xlrd>=2.0.1"]
 
 [project.optional-dependencies]
 dev = ["pytest"]

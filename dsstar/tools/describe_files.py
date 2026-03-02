@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import csv
-import importlib.util
 import json
+
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -82,25 +82,25 @@ def _describe_json(path: Path) -> Dict[str, Any]:
     }
 
 
-def _describe_xlsx(path: Path) -> Dict[str, Any]:
-    if importlib.util.find_spec("openpyxl") is None:
-        return {
-            "type": "xlsx",
-            "warning": "openpyxl not installed; cannot read sheets.",
-        }
-    from openpyxl import load_workbook
+def _read_excel_df(path: Path):
+    import pandas as pd
+    suffix = path.suffix.lower()
+    if suffix == ".xls":
+        return pd.read_excel(path, sheet_name=0, engine="xlrd")
+    if suffix == ".xlsx":
+        return pd.read_excel(path, sheet_name=0)
+    raise ValueError(f"Unsupported Excel suffix: {suffix}")
 
-    wb = load_workbook(path, read_only=True)
-    sheets_info = {}
-    for sheet in wb.sheetnames:
-        ws = wb[sheet]
-        rows = []
-        for idx, row in enumerate(ws.iter_rows(values_only=True)):
-            rows.append([str(cell) if cell is not None else "" for cell in row])
-            if idx >= 4:
-                break
-        sheets_info[sheet] = {"sample_rows": rows}
-    return {"type": "xlsx", "sheets": sheets_info}
+
+def _describe_excel(path: Path) -> Dict[str, Any]:
+    df = _read_excel_df(path)
+    sample_rows = df.head(5).fillna("").astype(str).values.tolist()
+    return {
+        "type": path.suffix.lower().lstrip("."),
+        "header": [str(col) for col in df.columns.tolist()],
+        "sample_rows": sample_rows,
+        "row_count": int(df.shape[0]),
+    }
 
 
 def describe_files(paths: List[str], output_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -114,8 +114,8 @@ def describe_files(paths: List[str], output_path: Optional[Path] = None) -> Dict
         try:
             if suffix == ".csv":
                 info = _describe_csv(path)
-            elif suffix == ".xlsx":
-                info = _describe_xlsx(path)
+            elif suffix in {".xlsx", ".xls"}:
+                info = _describe_excel(path)
             elif suffix == ".json":
                 info = _describe_json(path)
             elif suffix in {".txt", ".md"}:
@@ -124,6 +124,16 @@ def describe_files(paths: List[str], output_path: Optional[Path] = None) -> Dict
                 info = _describe_text(path)
             descriptions["files"][raw] = info
         except Exception as exc:  # pylint: disable=broad-except
+            if suffix == ".xls":
+                message = f"{exc}. Legacy .xls requires pandas+xlrd; convert to .xlsx if needed."
+                descriptions["files"][raw] = {
+                    "type": "xls",
+                    "path": str(path),
+                    "name": path.name,
+                    "anomalies": [message],
+                }
+                descriptions["warnings"].append(f"Failed to describe {raw}: {message}")
+                continue
             descriptions["warnings"].append(f"Failed to describe {raw}: {exc}")
     if output_path:
         output_path.write_text(json.dumps(descriptions, indent=2), encoding="utf-8")
