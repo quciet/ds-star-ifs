@@ -14,6 +14,7 @@ SUPPORTED_INPUT_EXTENSIONS = {
     ".csv",
     ".tsv",
     ".xlsx",
+    ".xls",
     ".xlsm",
     ".json",
     ".txt",
